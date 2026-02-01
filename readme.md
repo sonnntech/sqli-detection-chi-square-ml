@@ -65,6 +65,7 @@ Evaluate AFTER Feature Selection (5 models, 5-fold CV)
    ↓
 Visualization (Bar charts + t-SNE)
 ```
+![alt text](sqli_pipeline.png)
 
 ⚠️ Quan trọng: Đây là **sequential experiment**, không phải hai nhánh song song.
 
