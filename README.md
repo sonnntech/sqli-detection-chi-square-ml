@@ -66,12 +66,7 @@ Visualization (Bar charts + t-SNE)
 
 ## 🗃️ Dataset
 
-Sử dụng file:
-
-```
-data/SQLiV3.csv
-```
-
+## 🧪 Chuẩn bị bộ dữ liệu bằng data/SQLiV3.csv
 Yêu cầu cấu trúc:
 
 | Sentence       | Label |
@@ -80,10 +75,6 @@ Yêu cầu cấu trúc:
 
 * `0` → Normal query
 * `1` → SQL Injection query
-
-Bạn copy **nguyên block này** và dán **ngay sau phần `## 🗃️ Dataset`** trong README là chuẩn cấu trúc paper.
-
----
 
 ## 🧪 Chuẩn bị bộ dữ liệu bằng SQLMap (theo đúng phương pháp của bài báo)
 
