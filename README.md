@@ -81,6 +81,114 @@ Yêu cầu cấu trúc:
 * `0` → Normal query
 * `1` → SQL Injection query
 
+Bạn copy **nguyên block này** và dán **ngay sau phần `## 🗃️ Dataset`** trong README là chuẩn cấu trúc paper.
+
+---
+
+## 🧪 Chuẩn bị bộ dữ liệu bằng SQLMap (theo đúng phương pháp của bài báo)
+
+Ngoài việc sử dụng file `SQLiV3.csv`, dự án này còn hỗ trợ tạo **bộ dữ liệu SQL Injection thực tế** theo đúng phương pháp mà bài báo đã thực hiện.
+
+Trong bài báo gốc, tác giả **không sử dụng dataset có sẵn**. Thay vào đó, họ:
+
+1. Ghi lại **input bình thường của người dùng** từ các form nhập liệu
+2. Thực hiện **tấn công SQL Injection có kiểm soát** bằng SQLMap
+3. Ghi log toàn bộ payload mà SQLMap sinh ra
+4. Ghép hai phần này lại thành dataset có gán nhãn
+
+Bạn có thể tái hiện quy trình này ngay trên máy của mình bằng **DVWA (Damn Vulnerable Web App)** và **SQLMap**.
+
+---
+
+### Bước 1 — Chạy DVWA bằng Docker
+
+```bash
+docker run -d --name dvwa -p 8080:80 vulnerables/web-dvwa:1.9
+```
+
+Mở trình duyệt:
+
+```
+http://localhost:8080
+```
+
+Đăng nhập: `admin / password`
+Vào mục **SQL Injection**.
+
+---
+
+### Bước 2 — Sinh payload SQL Injection bằng SQLMap
+
+Chạy trên Terminal của máy (không chạy trong Docker):
+
+```bash
+sqlmap -u "http://localhost:8080/vulnerabilities/sqli/?id=1&Submit=Submit" \
+--batch --level=2 --risk=1 --technique=BEU -v 3 \
+--stop=50 > sqli_payloads.txt
+```
+
+Lệnh này sẽ ghi lại các payload tấn công mà SQLMap tạo ra vào file `sqli_payloads.txt`.
+
+---
+
+### Bước 3 — Tạo dữ liệu input bình thường
+
+Tạo file `normal.txt`:
+
+```
+id=1
+id=2
+id=admin
+id=test
+id=123
+```
+
+Đây là các input hợp lệ của người dùng.
+
+---
+
+### Bước 4 — Tạo file dataset CSV
+
+Tạo file `build_dataset.py`:
+
+```python
+import csv
+
+payloads = []
+with open("sqli_payloads.txt") as f:
+    for line in f:
+        if "[PAYLOAD]" in line:
+            payload = line.split("[PAYLOAD]")[-1].strip()
+            payloads.append(payload)
+
+normals = []
+with open("normal.txt") as f:
+    for line in f:
+        normals.append(line.strip())
+
+with open("dataset1.csv", "w", newline="") as csvfile:
+    writer = csv.writer(csvfile)
+    writer.writerow(["Sentence", "Label"])
+
+    for n in normals:
+        writer.writerow([n, 0])
+
+    for p in payloads:
+        writer.writerow([p, 1])
+
+print("dataset1.csv created!")
+```
+
+Chạy:
+
+```bash
+python build_dataset.py
+```
+
+Bạn sẽ thu được file `dataset1.csv` đúng theo phương pháp mà bài báo đã mô tả:
+
+> ghi lại input bình thường + payload do SQLMap sinh ra.
+
 ---
 
 ## 🛠️ Cài đặt môi trường
