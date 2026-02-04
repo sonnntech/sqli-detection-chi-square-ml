@@ -40,26 +40,6 @@ Chứng minh rằng **Chi-Square Feature Selection** giúp:
 ---
 
 ## 🧠 Pipeline xử lý
-
-```
-Load CSV
-   ↓
-Data Cleaning
-   ↓
-Text Preprocessing
-   ↓
-Train/Test Split (Stratified 80/20)
-   ↓
-TF-IDF Vectorization (train)
-   ↓
-Evaluate BEFORE Feature Selection (5 models, 5-fold CV)
-   ↓
-Chi-Square Feature Selection (Top 500 features)
-   ↓
-Evaluate AFTER Feature Selection (5 models, 5-fold CV)
-   ↓
-Visualization (Bar charts + t-SNE)
-```
 ![Before Chi-square](sqli_pipeline.png)
 
 ---
