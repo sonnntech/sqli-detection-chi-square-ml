@@ -64,7 +64,7 @@ Visualization (Bar charts + t-SNE)
 
 ---
 
-## 🗃️ Dataset
+## 🗃️ Dataset 2 bộ dữ liệu:
 
 ## 🧪 Chuẩn bị bộ dữ liệu bằng data/SQLiV3.csv
 Yêu cầu cấu trúc:
@@ -87,7 +87,7 @@ Trong bài báo gốc, tác giả **không sử dụng dataset có sẵn**. Thay
 3. Ghi log toàn bộ payload mà SQLMap sinh ra
 4. Ghép hai phần này lại thành dataset có gán nhãn
 
-Bạn có thể tái hiện quy trình này ngay trên máy của mình bằng **DVWA (Damn Vulnerable Web App)** và **SQLMap**.
+Tái hiện quy trình này ngay trên máy local bằng **DVWA (Damn Vulnerable Web App)** và **SQLMap**.
 
 ---
 
@@ -251,6 +251,8 @@ Kết quả:
 ### After Chi-square Feature Selection
 ![After Chi-square](after.png)
 
+### Trực quan hoá phân bổ dữ liệu trước và sau Feature Selection
+![After Chi-square](Figure_1.png)
 ---
 
 ## 🔬 Ý nghĩa khoa học
