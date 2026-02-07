@@ -144,57 +144,80 @@ python data_analysis.py
 
 ---
 
-## 🧠 Pipeline
+## 🧠 Experiment Workflow (`main_imporoved.py`)
 
-```
-SQLiV3.csv → clean_data.py → SQLiV3_cleaned.csv
-    ↓
-data_analysis.py → insights
-    ↓
-main.py:
-  1. Text Preprocessing (lowercase, stop words)
-  2. TF-IDF (49,607 features)
-  3. Chi-square (2,551 features)
-  4. Train 5 models
-  5. 5-fold CV
-    ↓
-Results: 99.73% accuracy
+```bash
+python main_imporoved.py
 ```
 
----
+### Step 1: Load & Preprocess
 
-## 🤖 Models & Results
+- Loaded **30,405** samples (Benign: 19,128 — 62.91%, Malicious: 11,277 — 37.09%)
+- Text cleaning: lowercase, giữ SQL-specific tokens (`'`, `--`, `;`, `|`)
+- Remove stop words (giữ SQL keywords: `select`, `or`, `and`, `union`...)
 
-| Model | Before FS | After FS | Improvement |
-|-------|-----------|----------|-------------|
-| **Decision Tree** | 96.50% | **99.73%** ⭐ | +3.23% |
-| MNB | 99.27% | 99.47% | +0.20% |
-| SVM | 99.23% | 99.48% | +0.25% |
-| LR | 97.85% | 98.04% | +0.19% |
-| KNN | 55.22% | 96.04% | +40.82% |
+### Step 2: Train-Test Split
 
-**Efficiency Gains:**
-- Features: 49,607 → 2,551 (95% ⬇️)
-- Training time: 12.5s → 3.99s (68% faster)
-- Inference: 0.031ms → 0.0096ms (69% faster)
+| | Size |
+|---|---|
+| Train | 24,324 (80%) |
+| Test | 6,081 (20%) |
+
+### Step 3: TF-IDF Vectorization
+
+- Vocabulary size: **20,844**
+- Train shape: (24,324 x 20,844)
+
+### Step 4: Chi-Square Feature Selection
+
+- Optimal k = **2,551** (from paper)
+- Features reduced: 20,844 → 2,551 (**87.8% reduction**)
+
+### Step 5: Cross-Validation Results (Stratified 5-Fold)
+
+| Model | Before FS | After FS | Change |
+|-------|-----------|----------|--------|
+| MNB | 94.64% ± 0.18% | 93.56% ± 0.08% | -1.08% |
+| LR | 94.10% ± 0.07% | 94.17% ± 0.12% | +0.07% |
+| **DT** | 78.91% ± 0.25% | **99.51% ± 0.11%** ⭐ | **+20.60%** |
+| SVM | 97.45% ± 0.17% | 97.84% ± 0.18% | +0.39% |
+| KNN | 49.47% ± 0.43% | 91.48% ± 0.48% | +42.01% |
+
+### Step 6: Test Set Evaluation (Best Model: Decision Tree)
+
+| Metric | Score |
+|--------|-------|
+| Accuracy | **98.37%** |
+| Precision | 99.40% |
+| Recall | 96.19% |
+| F1-Score | 97.77% |
+| FPR | 0.34% |
+| Misclassification | 1.63% |
+
+### Step 7: Computational Efficiency (Decision Tree)
+
+| Metric | Before FS | After FS | Improvement |
+|--------|-----------|----------|-------------|
+| Training Time | 1.6921s | 0.1213s | **93% faster** |
+| Inference Time | 0.0020 ms/query | 0.0001 ms/query | **95% faster** |
+| Model Size | 0.79 MB | 0.03 MB | **96% smaller** |
 
 ---
 
 ## 📈 Visualization
 
-**Data Analysis (5 charts):**
-- label_distribution.png
-- query_analysis.png
-- attack_types.png
-- vocabulary_analysis.png
-- special_characters.png
+Output: `results/`
 
-**Experiment Results (3 charts):**
-- before.png - Metrics trước FS
-- after.png - Metrics sau FS
-- Figure_1.png - t-SNE visualization
+| File | Mô tả |
+|------|--------|
+| `comparison.png` | Grouped bar chart — Before vs After FS |
+| `tsne_comparison.png` | t-SNE 2D — Before vs After FS |
 
-![Before vs After](results/after.png)
+![Model Comparison](results/comparison.png)
+*Before vs After Feature Selection*
+
+![t-SNE](results/tsne_comparison.png)
+*t-SNE: Before FS (overlap) vs After FS (tách biệt rõ ràng)*
 
 ---
 
