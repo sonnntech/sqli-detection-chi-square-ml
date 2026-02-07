@@ -97,21 +97,35 @@ python -c "import nltk; nltk.download('stopwords')"
 
 ## 📊 Phân tích Dataset
 
-### Option 1: Script tự động
-
 ```bash
 python data_analysis.py
 ```
 
-**Output:** 5 charts + console statistics
+### PHẦN 1: Khảo sát cơ bản Dataset
 
-### Option 2: Interactive Notebook
+**Kích thước dataset:**
+- Số dòng (samples): 30,405
+- Số cột (features): 2
 
-```bash
-jupyter notebook data_exploration.ipynb
-```
+**Các cột trong dataset:**
 
-**7 Sections:** Initial Exploration → Label Analysis → Query Analysis → Attack Types → Vocabulary → Special Characters → Samples
+| # | Column   | Non-Null Count | Dtype  |
+|---|----------|----------------|--------|
+| 0 | Sentence | 30,405 non-null | object |
+| 1 | Label    | 30,405 non-null | int64  |
+
+- Memory usage: 475.2+ KB
+- Missing values: Không có missing values
+
+**5 dòng đầu tiên:**
+
+| | Sentence | Label |
+|---|----------|-------|
+| 0 | `" or pg_sleep  (  __TIME__  )  --` | 1 |
+| 1 | `AND 1 = utl_inaddr.get_host_address ( ...` | 1 |
+| 2 | `select * from users where id = '1' or @@1 ...` | 1 |
+| 3 | `select * from users where id = 1 or 1#" ( ...` | 1 |
+| 4 | `select name from syscolumns where id = ...` | 1 |
 
 ### Key Insights
 
