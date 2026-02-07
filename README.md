@@ -288,7 +288,7 @@ Bạn sẽ thu được file `dataset1.csv` đúng theo phương pháp mà bài 
 
 ## 🧠 Pipeline xử lý
 
-![Pipeline](sqli_pipeline.png)
+![Pipeline](results/sqli_pipeline.png)
 
 ```
 Raw Data (SQLiV3.csv)
@@ -417,10 +417,10 @@ Sau khi hoàn thành, bạn sẽ có:
 
 So sánh performance BEFORE vs AFTER Chi-Square:
 
-![Before Chi-square](before.png)
+![Before Chi-square](results/before.png)
 *Metrics trước khi Feature Selection*
 
-![After Chi-square](after.png)
+![After Chi-square](results/after.png)
 *Metrics sau khi Feature Selection - Cải thiện rõ rệt!*
 
 **Key Observations:**
@@ -434,7 +434,7 @@ So sánh performance BEFORE vs AFTER Chi-Square:
 
 Trực quan hóa phân bố dữ liệu trong không gian 2D:
 
-![t-SNE Plot](Figure_1.png)
+![t-SNE Plot](results/Figure_1.png)
 *Trái: Before FS (overlap cao) | Phải: After FS (tách biệt rõ ràng)*
 
 **Insights:**
