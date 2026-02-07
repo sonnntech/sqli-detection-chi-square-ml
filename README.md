@@ -142,9 +142,6 @@ python data_analysis.py
 | | Stacked queries | 8% — `;` multiple statements |
 | **Top Words** | Benign | `select`, `from`, `where`, `id` |
 | | Malicious | `union`, `sleep`, `or`, `and`, `convert` |
-| **Why Chi-square** | TF-IDF output | ~50,000 features (too many) |
-| | After selection | 2,551 features (95% reduction) |
-| | Result | Removes noise, keeps discriminative features |
 
 ---
 
