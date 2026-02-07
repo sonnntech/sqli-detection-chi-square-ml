@@ -129,25 +129,22 @@ python data_analysis.py
 
 ### Key Insights
 
-**Đặc điểm Dataset:**
-- ~30K queries, balanced 50-50
-- Malicious queries dài hơn 2x (150 vs 80 chars)
-
-**Các loại tấn công:**
-- Comment-based (70%): `--`, `#`, `/* */`
-- Boolean-based (60%): `OR 1=1`
-- UNION-based (40%): `UNION SELECT`
-- Time-based (15%): `SLEEP()`, `WAITFOR`
-
-**Discriminative Words:**
-- Benign: select, from, where, id
-- Malicious: union, sleep, or, and, convert
-
-**Tại sao chọn TF-IDF + Chi-square?**
-- TF-IDF tạo ~50K features (vocabulary size)
-- Nhiều noise: common SQL keywords
-- Chi-square giảm xuống 2,551 features (95% reduction)
-- Giữ lại high discriminative words
+| Category | Metric | Detail |
+|----------|--------|--------|
+| **Dataset** | Total samples | ~30,000 queries (balanced 50-50) |
+| | Avg length (Benign) | 80 chars |
+| | Avg length (Malicious) | 150 chars (2x longer) |
+| **Attack Types** | Comment-based | 70% — `--`, `#`, `/* */` |
+| | Boolean-based | 60% — `OR 1=1`, `AND 1=1` |
+| | UNION-based | 40% — `UNION SELECT` |
+| | Time-based | 15% — `SLEEP()`, `WAITFOR` |
+| | Error-based | 11% — `CAST`, `CONVERT` |
+| | Stacked queries | 8% — `;` multiple statements |
+| **Top Words** | Benign | `select`, `from`, `where`, `id` |
+| | Malicious | `union`, `sleep`, `or`, `and`, `convert` |
+| **Why Chi-square** | TF-IDF output | ~50,000 features (too many) |
+| | After selection | 2,551 features (95% reduction) |
+| | Result | Removes noise, keeps discriminative features |
 
 ---
 

@@ -160,31 +160,7 @@ def analyze_labels(df):
     else:
         print("   ❌ Dataset mất cân bằng nghiêm trọng (highly imbalanced)")
     
-    # Visualization
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 5))
-    
-    # Bar chart
-    label_names = ['Benign\n(Normal)', 'Malicious\n(SQL Injection)']
-    colors = ['#2ecc71', '#e74c3c']
-    ax1.bar(label_names, label_counts.values, color=colors, alpha=0.7, edgecolor='black')
-    ax1.set_ylabel('Number of Samples')
-    ax1.set_title('Class Distribution')
-    ax1.grid(axis='y', alpha=0.3)
-    
-    # Add value labels on bars
-    for i, (name, count) in enumerate(zip(label_names, label_counts.values)):
-        ax1.text(i, count + len(df)*0.01, f'{count:,}\n({count/len(df)*100:.1f}%)', 
-                ha='center', fontweight='bold')
-    
-    # Pie chart
-    ax2.pie(label_counts.values, labels=label_names, colors=colors, autopct='%1.1f%%',
-           startangle=90, explode=(0.05, 0.05))
-    ax2.set_title('Class Proportion')
-    
-    plt.tight_layout()
-    plt.savefig('label_distribution.png', dpi=300, bbox_inches='tight')
-    print("\n✓ Saved: label_distribution.png")
-    plt.show()
+    return label_counts
 
 
 # ==============================================================================
@@ -232,68 +208,7 @@ def analyze_queries(df):
             print(f"      Độ dài Max: {subset['query_length'].max()}")
             print(f"      Số từ TB: {subset['word_count'].mean():.1f} từ")
     
-    # Visualization
-    fig, axes = plt.subplots(2, 2, figsize=(15, 10))
-    
-    # 1. Query length distribution
-    ax = axes[0, 0]
-    if 'Label' in df.columns:
-        benign = df[df['Label'] == 0]['query_length']
-        malicious = df[df['Label'] == 1]['query_length']
-        
-        ax.hist([benign, malicious], bins=50, label=['Benign', 'Malicious'], 
-               color=['#2ecc71', '#e74c3c'], alpha=0.6)
-        ax.set_xlabel('Query Length (characters)')
-        ax.set_ylabel('Frequency')
-        ax.set_title('Query Length Distribution')
-        ax.legend()
-        ax.grid(True, alpha=0.3)
-    
-    # 2. Word count distribution
-    ax = axes[0, 1]
-    if 'Label' in df.columns:
-        benign_words = df[df['Label'] == 0]['word_count']
-        malicious_words = df[df['Label'] == 1]['word_count']
-        
-        ax.hist([benign_words, malicious_words], bins=30, 
-               label=['Benign', 'Malicious'], 
-               color=['#2ecc71', '#e74c3c'], alpha=0.6)
-        ax.set_xlabel('Number of Words')
-        ax.set_ylabel('Frequency')
-        ax.set_title('Word Count Distribution')
-        ax.legend()
-        ax.grid(True, alpha=0.3)
-    
-    # 3. Box plot - query length
-    ax = axes[1, 0]
-    if 'Label' in df.columns:
-        data_to_plot = [df[df['Label'] == 0]['query_length'].values,
-                       df[df['Label'] == 1]['query_length'].values]
-        bp = ax.boxplot(data_to_plot, labels=['Benign', 'Malicious'],
-                       patch_artist=True)
-        bp['boxes'][0].set_facecolor('#2ecc71')
-        bp['boxes'][1].set_facecolor('#e74c3c')
-        ax.set_ylabel('Query Length (characters)')
-        ax.set_title('Query Length Box Plot')
-        ax.grid(True, alpha=0.3)
-    
-    # 4. Box plot - word count
-    ax = axes[1, 1]
-    if 'Label' in df.columns:
-        data_to_plot = [df[df['Label'] == 0]['word_count'].values,
-                       df[df['Label'] == 1]['word_count'].values]
-        bp = ax.boxplot(data_to_plot, labels=['Benign', 'Malicious'],
-                       patch_artist=True)
-        bp['boxes'][0].set_facecolor('#2ecc71')
-        bp['boxes'][1].set_facecolor('#e74c3c')
-        ax.set_ylabel('Number of Words')
-        ax.set_title('Word Count Box Plot')
-        ax.grid(True, alpha=0.3)
-    
-    plt.tight_layout()
-    plt.savefig('query_analysis.png', dpi=300, bbox_inches='tight')
-    print("\n✓ Saved: query_analysis.png")
-    plt.show()
+    return df
 
 
 # ==============================================================================
@@ -407,27 +322,7 @@ def detect_attack_types(df):
         if not found:
             print(f"   (Không tìm thấy ví dụ)")
     
-    # Visualization
-    fig, ax = plt.subplots(figsize=(12, 6))
-    
-    attack_types = list(attack_counts.keys())
-    counts = list(attack_counts.values())
-    
-    bars = ax.barh(attack_types, counts, color='#e74c3c', alpha=0.7, edgecolor='black')
-    ax.set_xlabel('Number of Queries')
-    ax.set_title('SQL Injection Attack Types Distribution')
-    ax.grid(axis='x', alpha=0.3)
-    
-    # Add value labels
-    for i, (bar, count) in enumerate(zip(bars, counts)):
-        percentage = (count / len(malicious)) * 100
-        ax.text(count + max(counts)*0.01, i, f'{count:,} ({percentage:.1f}%)', 
-               va='center', fontweight='bold')
-    
-    plt.tight_layout()
-    plt.savefig('attack_types.png', dpi=300, bbox_inches='tight')
-    print("\n✓ Saved: attack_types.png")
-    plt.show()
+    return attack_counts, len(malicious)
 
 
 # ==============================================================================
@@ -494,31 +389,7 @@ def analyze_vocabulary(df):
     for i, (word, count) in enumerate(discriminative[:30], 1):
         print(f"   {i:2d}. {word:20s} : {count:5,} lần")
     
-    # Visualization - Top words comparison
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 6))
-    
-    # Benign top words
-    benign_top = benign_counter.most_common(15)
-    words, counts = zip(*benign_top)
-    ax1.barh(words, counts, color='#2ecc71', alpha=0.7, edgecolor='black')
-    ax1.set_xlabel('Frequency')
-    ax1.set_title('Top 15 Words in Benign Queries')
-    ax1.invert_yaxis()
-    ax1.grid(axis='x', alpha=0.3)
-    
-    # Malicious top words
-    malicious_top = malicious_counter.most_common(15)
-    words, counts = zip(*malicious_top)
-    ax2.barh(words, counts, color='#e74c3c', alpha=0.7, edgecolor='black')
-    ax2.set_xlabel('Frequency')
-    ax2.set_title('Top 15 Words in Malicious Queries')
-    ax2.invert_yaxis()
-    ax2.grid(axis='x', alpha=0.3)
-    
-    plt.tight_layout()
-    plt.savefig('vocabulary_analysis.png', dpi=300, bbox_inches='tight')
-    print("\n✓ Saved: vocabulary_analysis.png")
-    plt.show()
+    return benign_counter, malicious_counter
 
 
 # ==============================================================================
@@ -577,30 +448,7 @@ def analyze_special_characters(df):
         print(f"{char_name:<20s} | {benign_count:5,} ({benign_pct:5.1f}%) | "
               f"{mal_count:5,} ({mal_pct:5.1f}%) | {diff:+6.1f}%")
     
-    # Visualization
-    fig, ax = plt.subplots(figsize=(12, 6))
-    
-    char_names = list(special_chars.keys())
-    benign_pcts = [results['Benign'][name][1] for name in char_names]
-    mal_pcts = [results['Malicious'][name][1] for name in char_names]
-    
-    x = np.arange(len(char_names))
-    width = 0.35
-    
-    ax.bar(x - width/2, benign_pcts, width, label='Benign', color='#2ecc71', alpha=0.7)
-    ax.bar(x + width/2, mal_pcts, width, label='Malicious', color='#e74c3c', alpha=0.7)
-    
-    ax.set_ylabel('Percentage of Queries (%)')
-    ax.set_title('Special Characters Frequency')
-    ax.set_xticks(x)
-    ax.set_xticklabels(char_names, rotation=45, ha='right')
-    ax.legend()
-    ax.grid(axis='y', alpha=0.3)
-    
-    plt.tight_layout()
-    plt.savefig('special_characters.png', dpi=300, bbox_inches='tight')
-    print("\n✓ Saved: special_characters.png")
-    plt.show()
+    return results, special_chars
 
 
 # ==============================================================================
@@ -667,8 +515,8 @@ def main():
     print("🔍" * 40)
     
     # Check for cleaned file first
-    cleaned_file = Path("SQLiV3_cleaned.csv")
-    original_file = Path("SQLiV3.csv")
+    cleaned_file = Path("data/SQLiV3_cleaned.csv")
+    original_file = Path("data/SQLiV3.csv")
     
     if cleaned_file.exists():
         print(f"\n✓ Tìm thấy file đã clean: {cleaned_file}")
@@ -703,40 +551,27 @@ def main():
             print("   df = df[df['Label'].isin([0, 1])]")
             print("\n" + "⚠️" * 40)
     
-    analyze_labels(df)
-    
+    label_counts = analyze_labels(df)
+
     # Only continue if we have binary classification
-    if 'Label' in df.columns and df['Label'].nunique() == 2:
-        analyze_queries(df)
-        detect_attack_types(df)
-        analyze_vocabulary(df)
-        analyze_special_characters(df)
-        show_samples(df, n_samples=5)
-        
-        print("\n" + "=" * 80)
-        print("✅ HOÀN THÀNH PHÂN TÍCH")
-        print("=" * 80)
-        print("\nĐã tạo các file:")
-        print("   1. label_distribution.png")
-        print("   2. query_analysis.png")
-        print("   3. attack_types.png")
-        print("   4. vocabulary_analysis.png")
-        print("   5. special_characters.png")
-        
-        print("\n📝 KẾT LUẬN:")
-        print("   Bây giờ bạn đã hiểu:")
-        print("   ✓ Cấu trúc dataset SQLiV3.csv")
-        print("   ✓ Phân bố benign vs malicious")
-        print("   ✓ Các loại tấn công SQL injection")
-        print("   ✓ Đặc trưng ngôn ngữ học")
-        print("   ✓ Ký tự đặc biệt quan trọng")
-        print("\n   → Có thể sử dụng insights này để:")
-        print("      - Viết phần mô tả dataset trong báo cáo")
-        print("      - Giải thích tại sao chọn TF-IDF và Chi-square")
-        print("      - Phân tích kết quả thực nghiệm")
-    else:
+    if 'Label' not in df.columns or df['Label'].nunique() != 2:
         print("\n⚠️  Phân tích bị dừng do dataset cần clean")
         print("   Vui lòng chạy: python clean_data.py")
+        return
+
+    # Run all analyses (console output only)
+    df = analyze_queries(df)
+    attack_counts, n_malicious = detect_attack_types(df)
+    benign_counter, malicious_counter = analyze_vocabulary(df)
+    analyze_special_characters(df)
+    show_samples(df, n_samples=5)
+
+    # ====================================================================
+    # SUMMARY
+    # ====================================================================
+    print("\n" + "=" * 80)
+    print("✅ HOÀN THÀNH PHÂN TÍCH")
+    print("=" * 80)
 
 
 if __name__ == "__main__":
