@@ -282,7 +282,7 @@ python main.py
 5. Stratified 5-Fold CV
 6. Evaluation + Visualization
 
-## 🎯 Tư duy cốt lõi của pipeline
+## 🎯 Ý tưởng 
 
 | Bước | Input | Output | Mục đích |
 |---|---|---|---|
