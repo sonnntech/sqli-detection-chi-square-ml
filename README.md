@@ -43,7 +43,6 @@ python main.py
 ├── main.py                    # Main experiment
 ├── clean_data.py              # Data cleaning
 ├── data_analysis.py           # Data analysis (7 sections)
-├── data_exploration.ipynb     # Interactive notebook
 ├── requirements.txt
 └── data/
     ├── SQLiV3.csv            # Original (Kaggle)
@@ -114,7 +113,7 @@ python data_analysis.py
 | 0 | Sentence | 30,405 non-null | object |
 | 1 | Label    | 30,405 non-null | int64  |
 
-- Memory usage: 475.2+ KB
+- Memory usage: ~3 MB
 - Missing values: Không có missing values
 
 **5 dòng đầu tiên:**
@@ -150,7 +149,7 @@ python data_analysis.py
 ```
 SQLiV3.csv → clean_data.py → SQLiV3_cleaned.csv
     ↓
-data_analysis.py → 5 charts + insights
+data_analysis.py → insights
     ↓
 main.py:
   1. Text Preprocessing (lowercase, stop words)
@@ -260,20 +259,3 @@ SQLiV3 - [Kaggle](https://www.kaggle.com/datasets/syedsaqlainhussain/sql-injecti
 - [ ] Deep Learning (LSTM, BERT)
 - [ ] Confusion matrix, ROC curves
 - [ ] Test trên external datasets
-
----
-
-## 👨‍💻 Author
-
-**Nguyen Ngoc Son** - [@sonnntech](https://github.com/sonnntech)
-
----
-
-## 📧 Support
-
-- 📝 [Issues](https://github.com/sonnntech/sqli-detection-chi-square-ml/issues)
-- ⭐ Star nếu thấy hữu ích!
-
----
-
-**Last Updated:** February 2025 | Python 3.8+ | scikit-learn 1.2+
