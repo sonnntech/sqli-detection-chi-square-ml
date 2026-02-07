@@ -42,7 +42,9 @@ import seaborn as sns
 # ------------------------------------------------------------------------------
 
 SEED = 42
-DATA_PATH = Path("data/SQLiV3_cleaned.csv")  # Use cleaned data
+# DATA_PATH = Path("data/SQLiV3_cleaned.csv")  # Use cleaned data
+# Line 30 - change path
+DATA_PATH = Path("data/SQLiV3_FULL_65K.csv")  # ← Update this
 RESULTS_DIR = Path("results")
 RESULTS_DIR.mkdir(exist_ok=True)
 
