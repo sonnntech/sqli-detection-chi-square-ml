@@ -36,7 +36,7 @@ chi_Square_v1/
 │   ├── SQLiV3.csv
 │   ├── SQLiV3_cleaned.csv
 │   ├── SQLiV3_FULL_65K.csv
-│   ├── custom_sqli_malicious.csv
+│   ├── custom_sqli_Attack.csv
 │   ├── custom_sqli_payloads.txt
 │   └── Enhanced SQL injection detection...docx
 │
@@ -69,8 +69,8 @@ https://www.kaggle.com/datasets/syedsaqlainhussain/sql-injection-dataset
 |----------|-------|
 | SQL query text | 0/1 |
 
-- `0` → Benign
-- `1` → Malicious
+- `0` → Normal
+- `1` → Attack
 
 ### Vấn đề dataset gốc
 
@@ -87,23 +87,23 @@ python clean_data.py
 **Xử lý:**
 - Loại bỏ missing values
 - Xóa duplicates
-- Filter chỉ giữ label 0 (benign) và 1 (malicious)
+- Filter chỉ giữ label 0 (Normal) và 1 (Attack)
 - Chuẩn hóa định dạng
 
 **Output:** `data/SQLiV3_cleaned.csv` (30,405 samples)
 
 **Phân phối:**
 ```
-Benign (0):    19,128 (62.91%)
-Malicious (1): 11,277 (37.09%)
+Normal (0):    19,128 (62.91%)
+Attack (1): 11,277 (37.09%)
 ```
 ---
 
-## 🔫 Luồng Data thứ 2: Tự sinh dữ liệu SQLi (Payload Generator + Merge)
+## Luồng Data thứ 2: Tự sinh dữ liệu SQLi (Payload Generator + Merge)
 
 ### Tại sao cần luồng data thứ 2?
 
-Dataset gốc từ Kaggle (SQLiV3.csv) sau khi clean chỉ còn ~30K samples và chủ yếu chứa các mẫu SQLi đơn giản. Trong thực tế, attacker sử dụng nhiều kỹ thuật **obfuscation** (ngụy trang) để bypass WAF/Firewall mà dataset gốc không bao phủ được. Vì vậy, project tự sinh thêm **~35,000 SQLi payloads đa dạng** rồi merge với benign queries để tạo dataset lớn hơn (~65K), giúp model:
+Dataset gốc từ Kaggle (SQLiV3.csv) sau khi clean chỉ còn ~30K samples và chủ yếu chứa các mẫu SQLi đơn giản. Trong thực tế, attacker sử dụng nhiều kỹ thuật **obfuscation** (ngụy trang) để bypass WAF/Firewall mà dataset gốc không bao phủ được. Vì vậy, project tự sinh thêm **~35,000 SQLi payloads đa dạng** rồi merge với Normal queries để tạo dataset lớn hơn (~65K), giúp model:
 
 - Nhận diện được nhiều biến thể tấn công hơn
 - Giảm overfitting (không chỉ học thuộc một vài pattern)
@@ -116,7 +116,7 @@ generate_all_payloads.py                    merge_data.py
 ┌─────────────────────┐                    ┌──────────────────────┐
 │  43 base patterns   │                    │                      │
 │  (OWASP/SQLMap)     │                    │  custom_sqli_        │
-│         │           │                    │  malicious.csv       │──┐
+│         │           │                    │  Attack.csv       │──┐
 │         ▼           │                    │  (~35K, Label=1)     │  │
 │  Obfuscation        │                    └──────────────────────┘  │
 │  (whitespace,       │    Output                                    │  concat
@@ -126,7 +126,7 @@ generate_all_payloads.py                    merge_data.py
 │  Cartesian Product  │                    │                      │  │
 │  (prefix+suffix)    │                    │  SQLiV3_cleaned.csv  │──┘
 │         │           │                    │  (chỉ lấy Label=0)  │
-│         ▼           │                    │  ~30K benign queries │
+│         ▼           │                    │  ~30K Normal queries │
 │  Random Mutation    │                    └──────────────────────┘
 │         │           │
 │         ▼           │
@@ -207,7 +207,7 @@ Tiếp tục biến đổi ngẫu nhiên cho đến khi đạt target 35,000 pay
 | File | Nội dung | Format | Dùng để |
 |------|---------|--------|---------|
 | `data/custom_sqli_payloads.txt` | ~35,000 dòng payload thô | Mỗi dòng 1 payload, không có header | Fuzzing, WAF testing, security lab |
-| `data/custom_sqli_malicious.csv` | ~35,000 dòng có label | CSV: `Sentence,Label` (tất cả Label=1) | Merge vào dataset để train ML model |
+| `data/custom_sqli_Attack.csv` | ~35,000 dòng có label | CSV: `Sentence,Label` (tất cả Label=1) | Merge vào dataset để train ML model |
 
 ---
 
@@ -217,20 +217,20 @@ Tiếp tục biến đổi ngẫu nhiên cho đến khi đạt target 35,000 pay
 python merge_data.py
 ```
 
-Script này ghép dữ liệu **malicious tự sinh** với **benign từ dataset gốc** để tạo dataset hoàn chỉnh:
+Script này ghép dữ liệu **Attack tự sinh** với **Normal từ dataset gốc** để tạo dataset hoàn chỉnh:
 
 #### Logic xử lý
 
 ```python
-# 1. Load malicious payloads đã generate
-malicious = pd.read_csv('data/custom_sqli_malicious.csv')    # ~35K, Label=1
+# 1. Load Attack payloads đã generate
+Attack = pd.read_csv('data/custom_sqli_Attack.csv')    # ~35K, Label=1
 
-# 2. Load dataset gốc đã clean, chỉ lấy benign queries
+# 2. Load dataset gốc đã clean, chỉ lấy Normal queries
 existing = pd.read_csv('data/SQLiV3_cleaned.csv')
-benign = existing[existing['Label'] == 0]                     # ~30K, Label=0
+Normal = existing[existing['Label'] == 0]                     # ~30K, Label=0
 
 # 3. Ghép 2 nguồn lại
-combined = pd.concat([malicious, benign], ignore_index=True)
+combined = pd.concat([Attack, Normal], ignore_index=True)
 
 # 4. Shuffle ngẫu nhiên (random_state=42 để reproducible)
 combined = combined.sample(frac=1, random_state=42).reset_index(drop=True)
@@ -243,8 +243,8 @@ combined.to_csv('data/SQLiV3_FULL_65K.csv', index=False)
 
 | Thành phần | Số lượng | Nguồn |
 |-----------|---------|-------|
-| Malicious (Label=1) | ~35,000 | `generate_all_payloads.py` tự sinh |
-| Benign (Label=0) | ~30,000 | `SQLiV3_cleaned.csv` (Kaggle gốc) |
+| Attack (Label=1) | ~35,000 | `generate_all_payloads.py` tự sinh |
+| Normal (Label=0) | ~30,000 | `SQLiV3_cleaned.csv` (Kaggle gốc) |
 | **Tổng cộng** | **~65,000** | `SQLiV3_FULL_65K.csv` |
 ---
 
@@ -258,11 +258,11 @@ python data_analysis.py
 
 | Category | Detail |
 |----------|--------|
-| Avg length benign | 80 chars |
-| Avg length malicious | 150 chars |
+| Avg length Normal | 80 chars |
+| Avg length Attack | 150 chars |
 | Top attack | Comment-based, Boolean-based, UNION |
-| Top words benign | select, from, where |
-| Top words malicious | union, sleep, or, and |
+| Top words Normal | select, from, where |
+| Top words Attack | union, sleep, or, and |
 
 ---
 
@@ -424,7 +424,7 @@ Ví dụ:
 | `union` | Rất mạnh |
 | `sleep` | Rất mạnh |
 | `or` | Mạnh |
-| `select` | Yếu (benign cũng có) |
+| `select` | Yếu (Normal cũng có) |
 | `from` | Yếu |
 | `id` | Vô nghĩa |
 
@@ -451,7 +451,7 @@ Công thức (ý tưởng):
 χ² = (Observed - Expected)² / Expected
 ```
 
-Nếu một từ xuất hiện **rất nhiều** trong SQLi nhưng **gần như không xuất hiện** trong benign:
+Nếu một từ xuất hiện **rất nhiều** trong SQLi nhưng **gần như không xuất hiện** trong Normal:
 
 → Chi-square rất cao.
 
@@ -465,7 +465,7 @@ Nếu một từ xuất hiện ở cả hai bên:
 
 Giả sử dataset:
 
-| Word  | Xuất hiện trong SQLi | Xuất hiện trong Benign |
+| Word  | Xuất hiện trong SQLi | Xuất hiện trong Normal |
 |-------|-----------------------|--------------------------|
 | union | 9000                  | 10                       |
 | sleep | 4000                  | 0                        |
